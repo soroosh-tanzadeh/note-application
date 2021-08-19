@@ -1,13 +1,12 @@
 <template>
-	<router-view />
+	<q-layout>
+		<router-view></router-view>
+	</q-layout>
 </template>
 
 <script>
 // Setup Firebase
-import firebase from "firebase";
-import "firebase/auth";
-import "firebase/database";
-
+import firebase from "firebase/app";
 firebase.initializeApp({
 	apiKey: process.env.FIREBASE_API_KEY,
 	authDomain: process.env.FIREBASE_AUTHDOMAIN,
@@ -19,13 +18,10 @@ firebase.initializeApp({
 });
 
 export default {
+	name: "App",
+
 	provide: {
 		firebase: firebase,
 	},
-	mixins: [
-		{
-			inject: ["firebase"],
-		},
-	],
 };
 </script>
