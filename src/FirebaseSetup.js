@@ -1,6 +1,7 @@
 // Setup Firebase
 import firebase from "firebase/app";
 import "firebase/auth";
+import "firebase/database";
 
 firebase.initializeApp({
     apiKey: process.env.VUE_APP_FIREBASE_API_KEY,
@@ -11,4 +12,6 @@ firebase.initializeApp({
     messagingSenderId: process.env.VUE_APP_FIREBASE_MESSAGINGSENDERID,
     appId: process.env.VUE_APP_FIREBASE_APP_ID,
 });
+firebase.auth().setPersistence(firebase.auth.Auth.Persistence.SESSION);
+
 export default firebase;

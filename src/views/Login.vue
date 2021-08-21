@@ -56,12 +56,11 @@ export default {
 					});
 				});
 		},
-
 		createUser() {
 			this.auth()
 				.signInWithEmailAndPassword(this.email, this.password)
 				.then(() => {
-					this.$router.push("/home");
+					this.$router.push("/");
 				})
 				.catch((error) => {
 					this.notify({

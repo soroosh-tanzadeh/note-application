@@ -7,9 +7,12 @@ import { Quasar } from 'quasar'
 import quasarUserOptions from './quasar-user-options'
 import "./styles/app.scss";
 import FirebaseMixin from "@/mixins/FirebaseMixin";
+import firebase from "./FirebaseSetup";
 
-const app = createApp(App).use(Quasar, quasarUserOptions).use(store).use(router);
+firebase.auth().onAuthStateChanged(() => {
+    const app = createApp(App).use(Quasar, quasarUserOptions).use(store).use(router);
 
-app.mixin(FirebaseMixin);
+    app.mixin(FirebaseMixin);
 
-app.mount('#app');
+    app.mount('#app');
+})
