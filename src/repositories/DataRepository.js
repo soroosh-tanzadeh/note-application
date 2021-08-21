@@ -17,3 +17,17 @@ export function fetchData(scope) {
     })
 }
 
+export function removeChild(scope) {
+    firebase.database().ref(`${firebase.auth().currentUser.uid}/${scope}`).remove();
+}
+
+export function fetchAndListen(scope, action, orderBy = "time") {
+    var ref = firebase.database().ref(`${firebase.auth().currentUser.uid}/${scope}`).orderByChild(orderBy);
+    ref.on('value', action);
+}
+
+export function pushToScope(scope, data) {
+    var listRef = firebase.database().ref(`${firebase.auth().currentUser.uid}/${scope}`);
+    var newRef = listRef.push();
+    newRef.set(data);
+}

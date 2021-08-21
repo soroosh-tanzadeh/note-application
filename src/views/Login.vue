@@ -43,7 +43,7 @@ export default {
 		else next();
 	},
 	methods: {
-		doLogin() {
+		createUser() {
 			this.auth()
 				.createUserWithEmailAndPassword(this.email, this.password)
 				.then(() => {
@@ -56,7 +56,7 @@ export default {
 					});
 				});
 		},
-		createUser() {
+		doLogin() {
 			this.auth()
 				.signInWithEmailAndPassword(this.email, this.password)
 				.then(() => {
@@ -74,9 +74,9 @@ export default {
 				.fetchSignInMethodsForEmail(this.email)
 				.then((result) => {
 					if (result.length > 0) {
-						this.createUser();
-					} else {
 						this.doLogin();
+					} else {
+						this.createUser();
 					}
 				})
 				.catch((error) => {
