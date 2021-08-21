@@ -9,27 +9,85 @@
 				</form>
 			</q-card-section>
 			<q-card-section class="actions">
-				<q-btn color="primary">Login</q-btn>
+				<q-btn color="primary" @click="login">Login</q-btn>
 			</q-card-section>
 		</q-card>
 	</div>
 </template>
 
 <script>
-import InjectFirebase from "@/mixins/InjectFirebase";
-import "firebase/auth";
-import { ref } from "@vue/reactivity";
+import firebase from "@/FirebaseSetup";
 import TextInput from "../components/Input/TextInput.vue";
+import { useQuasar } from "quasar";
+
 export default {
+	watch: {},
 	components: { TextInput },
 	name: "Login",
 	setup() {
+		const $q = useQuasar();
 		return {
-			email: ref(""),
-			password: ref(""),
+			notify(options) {
+				$q.notify(options);
+			},
 		};
 	},
-	mixins: [InjectFirebase],
+	data() {
+		return {
+			email: "Hi",
+			password: "",
+		};
+	},
+	beforeRouteEnter(to, from, next) {
+		if (firebase.auth().currentUser != null) next({ name: "Home" });
+		else next();
+	},
+	methods: {
+		doLogin() {
+			this.auth()
+				.createUserWithEmailAndPassword(this.email, this.password)
+				.then(() => {
+					this.$router.push("/");
+				})
+				.catch((error) => {
+					this.notify({
+						type: "warning",
+						message: error.message,
+					});
+				});
+		},
+
+		createUser() {
+			this.auth()
+				.signInWithEmailAndPassword(this.email, this.password)
+				.then(() => {
+					this.$router.push("/home");
+				})
+				.catch((error) => {
+					this.notify({
+						type: "warning",
+						message: error.message,
+					});
+				});
+		},
+		login() {
+			this.auth()
+				.fetchSignInMethodsForEmail(this.email)
+				.then((result) => {
+					if (result.length > 0) {
+						this.createUser();
+					} else {
+						this.doLogin();
+					}
+				})
+				.catch((error) => {
+					this.notify({
+						type: "warning",
+						message: error.message,
+					});
+				});
+		},
+	},
 };
 </script>
 

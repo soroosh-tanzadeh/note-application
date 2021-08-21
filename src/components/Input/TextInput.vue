@@ -1,6 +1,6 @@
 <template>
 	<div class="material-textfield">
-		<input :type="type" :required="required" :placeholder="inputPlaceholder ? inputPlaceholder : ' '" :class="[inputClass, { invalid: invalid }]" @blur="check" @focus="onFocus" @input="$emit('input', val)" v-model="val" :maxlength="maxlength" class="input" />
+		<input :type="type" :required="required" :placeholder="inputPlaceholder ? inputPlaceholder : ' '" :class="[inputClass, { invalid: invalid }]" @blur="check" @focus="onFocus" @input="input" v-model="val" :maxlength="maxlength" class="input" />
 		<label v-if="placeholder !== undefined">{{ placeholder }}</label>
 		<slot></slot>
 	</div>
@@ -9,6 +9,9 @@
 <script>
 export default {
 	methods: {
+		input() {
+			this.$emit("update:modelValue", this.val);
+		},
 		onFocus() {
 			this.$emit("focus");
 			this.focus = true;
