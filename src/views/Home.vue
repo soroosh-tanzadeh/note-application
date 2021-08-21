@@ -17,19 +17,20 @@
 				</span>
 			</div>
 			<q-list>
-				<q-item clickable v-ripple :active="true" round>
+				<q-item clickable v-ripple :active="contentComponent == 'notes'" @click="contentComponent = 'notes'" round>
 					<q-item-section avatar>
 						<q-icon name="format_align_left" />
 					</q-item-section>
 					<q-item-section>Notes</q-item-section>
 				</q-item>
-				<q-item clickable v-ripple round>
+				<q-item clickable v-ripple round :active="contentComponent == 'favorite-notes'" @click="contentComponent = 'favorite-notes'">
 					<q-item-section avatar>
 						<q-icon name="favorite" />
 					</q-item-section>
 					<q-item-section>Favorite Notes</q-item-section>
 				</q-item>
 				<q-separator />
+
 				<q-item clickable v-ripple round>
 					<q-item-section avatar>
 						<q-icon name="logout" />
@@ -40,7 +41,9 @@
 		</div>
 
 		<div class="content">
-			<notes></notes>
+			<transition name="fade" mode="out-in">
+				<component :is="contentComponent"></component>
+			</transition>
 		</div>
 	</div>
 </template>
@@ -51,12 +54,15 @@ import { onMounted } from "@vue/runtime-core";
 import { fetchData } from "@/repositories/DataRepository";
 import firebase from "@/FirebaseSetup";
 import Notes from "../components/Home/Containers/Notes.vue";
+import FavoriteNotes from "../components/Home/Containers/FavoriteNotes.vue";
 
 export default {
-	components: { Notes },
+	components: { Notes, FavoriteNotes },
 	setup() {
 		let notes = ref([]);
 		let deletedNotes = ref(0);
+
+		let contentComponent = ref("notes");
 
 		const showNav = ref(false);
 
@@ -77,6 +83,7 @@ export default {
 			displayName,
 
 			showNav,
+			contentComponent,
 		};
 	},
 
@@ -140,6 +147,9 @@ export default {
 
 		.q-list {
 			padding: 8px;
+			&:not(.q-item--active) i {
+				color: #808080;
+			}
 			> .q-item {
 				border-radius: 4px;
 			}
@@ -147,6 +157,9 @@ export default {
 			.q-item--active {
 				background: #e3f2fd;
 				color: #2f80ed;
+				i {
+					color: #2f80ed;
+				}
 			}
 		}
 

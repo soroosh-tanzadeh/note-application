@@ -2,7 +2,7 @@
 	<div class="note-card">
 		<div class="card-header">
 			<strong class="title">{{ note.title }}</strong>
-			<q-icon size="24px" :name="`favorite${note.bookmarked ? '_border' : ''}`"></q-icon>
+			<q-btn flat @click="bookmark" class="q-pa-none"><q-icon size="24px" :name="`favorite${note.bookmarked ? '' : '_border'}`"></q-icon></q-btn>
 		</div>
 		<div class="card-body">
 			{{ note.text }}
@@ -14,7 +14,7 @@
 </template>
 
 <script>
-import { removeChild } from "@/repositories/DataRepository";
+import { removeChild, updateRef } from "@/repositories/DataRepository";
 
 export default {
 	props: {
@@ -22,6 +22,9 @@ export default {
 	},
 
 	methods: {
+		bookmark() {
+			updateRef(`notes/${this.note.key}`, { bookmarked: !this.note.bookmarked });
+		},
 		remove() {
 			removeChild(`notes/${this.note.key}`);
 		},
