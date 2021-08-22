@@ -31,7 +31,7 @@
 				</q-item>
 				<q-separator />
 
-				<q-item clickable v-ripple round>
+				<q-item clickable v-ripple round @click="signout">
 					<q-item-section avatar>
 						<q-icon name="logout" />
 					</q-item-section>
@@ -56,9 +56,26 @@ import firebase from "@/FirebaseSetup";
 import Notes from "../components/Home/Containers/Notes.vue";
 import FavoriteNotes from "../components/Home/Containers/FavoriteNotes.vue";
 
+import { useQuasar } from "quasar";
+
 export default {
 	components: { Notes, FavoriteNotes },
+	methods: {
+		signout() {
+			firebase
+				.auth()
+				.signOut()
+				.then(() => {
+					window.location = "/login";
+				})
+				.catch((error) => {
+					this.notify(error.message);
+				});
+		},
+	},
 	setup() {
+		const $q = useQuasar();
+
 		let notes = ref([]);
 		let deletedNotes = ref(0);
 
@@ -84,6 +101,10 @@ export default {
 
 			showNav,
 			contentComponent,
+
+			notify(options) {
+				$q.notify(options);
+			},
 		};
 	},
 

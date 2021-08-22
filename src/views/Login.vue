@@ -47,7 +47,7 @@ export default {
 			this.auth()
 				.createUserWithEmailAndPassword(this.email, this.password)
 				.then(() => {
-					this.$router.push("/");
+					window.location = "/";
 				})
 				.catch((error) => {
 					this.notify({
@@ -60,7 +60,7 @@ export default {
 			this.auth()
 				.signInWithEmailAndPassword(this.email, this.password)
 				.then(() => {
-					this.$router.push("/");
+					window.location = "/";
 				})
 				.catch((error) => {
 					this.notify({

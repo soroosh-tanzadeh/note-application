@@ -8,6 +8,20 @@
 			{{ note.text }}
 		</div>
 		<div class="card-footer">
+			<div>
+				<q-btn flat color="red" class="q-pa-none" v-if="attachments.length > 0">
+					<q-icon size="24px" name="attach_file"></q-icon>
+				</q-btn>
+
+				<q-menu class="attachments-menu" v-model="showAttachments">
+					<q-list style="min-width: 100px">
+						<q-item clickable v-for="attachment in attachments" :key="attachment" @click="selectAttachment(attachment)" v-close-popup>
+							<q-item-section>{{ attachment.substr(attachment.indexOf(".") + 1) }}</q-item-section>
+						</q-item>
+					</q-list>
+				</q-menu>
+			</div>
+
 			<q-btn flat color="red" @click="remove" class="q-pa-none"> <q-icon size="24px" name="delete"></q-icon></q-btn>
 		</div>
 	</div>
@@ -15,13 +29,52 @@
 
 <script>
 import { removeChild, updateRef } from "@/repositories/DataRepository";
+import { getDownloadURL } from "@/repositories/StorageAccess";
+import { useQuasar } from "quasar";
 
 export default {
 	props: {
 		note: { required: true },
 	},
-
+	setup() {
+		const $q = useQuasar();
+		return {
+			notify(options) {
+				$q.notify(options);
+			},
+		};
+	},
+	data() {
+		return {
+			showAttachments: false,
+		};
+	},
+	computed: {
+		attachments() {
+			return this.note.attachments ? JSON.parse(this.note.attachments) : [];
+		},
+	},
 	methods: {
+		selectAttachment(attachment) {
+			console.log(attachment);
+			getDownloadURL("attachments", attachment)
+				.then((url) => {
+					var element = document.createElement("a");
+					element.setAttribute("href", url);
+					element.setAttribute("target", "_blank");
+
+					element.style.display = "none";
+					document.body.appendChild(element);
+					element.click();
+					document.body.removeChild(element);
+				})
+				.catch(() => {
+					this.notify({
+						type: "warning",
+						message: "Error while getting file url.",
+					});
+				});
+		},
 		bookmark() {
 			updateRef(`notes/${this.note.key}`, { bookmarked: !this.note.bookmarked });
 		},
@@ -31,6 +84,14 @@ export default {
 	},
 };
 </script>
+
+<style>
+.attachments-menu {
+	max-width: 320px;
+	white-space: nowrap;
+	overflow: hidden;
+}
+</style>
 
 <style lang="scss" scoped>
 .note-card {
@@ -54,7 +115,7 @@ export default {
 
 	> .card-footer {
 		display: flex;
-		justify-content: flex-end;
+		justify-content: space-between;
 	}
 
 	> .card-body {

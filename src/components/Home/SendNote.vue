@@ -5,14 +5,19 @@
 			<q-input class="content-input" borderless v-model="text" label="Text" autogrow />
 		</div>
 		<div class="card-footer">
-			<q-btn flat color="primary"><q-icon size="24px" clickable name="attach_file"></q-icon></q-btn>
-			<q-btn flat color="primary" @click="send"><q-icon size="24px" clickable name="send"></q-icon></q-btn>
+			<q-btn flat color="primary" :disable="loading" @click="attachFile"><q-icon size="24px" clickable :name="files == null ? 'attach_file' : 'close'" /> {{ files != null ? ` ${files.length} ${files.length > 1 ? "files" : "file"}` : " Attach File (Multiple select is enable)" }}</q-btn>
+			<q-btn flat color="primary" :disable="loading" @click="send">
+				<q-spinner color="primary" size="24px" :thickness="2" v-if="loading" />
+				<q-icon size="24px" v-else clickable name="send"></q-icon>
+			</q-btn>
 		</div>
 	</div>
 </template>
 
 <script>
 import { pushToScope } from "@/repositories/DataRepository";
+import { uploadFile } from "@/repositories/StorageAccess";
+
 import { v4 as uuidv4 } from "uuid";
 import { useQuasar } from "quasar";
 
@@ -26,15 +31,64 @@ export default {
 		};
 	},
 	methods: {
-		send() {
-			if (Boolean(this.title) && Boolean(this.text)) {
-				pushToScope("notes", {
-					id: uuidv4(),
-					title: this.title,
-					text: this.text,
-					bookmarked: false,
-					time: Date.now(),
+		attachFile() {
+			if (this.files == null) {
+				let filechooser = document.createElement("input");
+				filechooser.multiple = true;
+				filechooser.type = "file";
+				filechooser.addEventListener("change", () => {
+					let files = filechooser.files;
+					this.files = files;
 				});
+				filechooser.click();
+			} else {
+				this.files = null;
+			}
+		},
+
+		async send() {
+			let $this = this;
+			async function* asyncUpload() {
+				let i = 0;
+				const listSize = $this.files.length;
+				while (i < listSize) {
+					const file = $this.files[i];
+					let attachment = await uploadFile(`attachments/${uuidv4()}.${file.name}`, file);
+					yield attachment.ref.fullPath;
+					i++;
+				}
+			}
+
+			if (Boolean(this.title) && Boolean(this.text)) {
+				if (this.files != null) {
+					this.loading = true;
+					for await (const attachment of asyncUpload()) {
+						this.attachments.push(attachment);
+					}
+
+					pushToScope("notes", {
+						id: uuidv4(),
+						title: this.title,
+						text: this.text,
+						bookmarked: false,
+						attachments: JSON.stringify(this.attachments),
+						time: Date.now(),
+					});
+					this.loading = false;
+				} else {
+					pushToScope("notes", {
+						id: uuidv4(),
+						title: this.title,
+						text: this.text,
+						bookmarked: false,
+						time: Date.now(),
+					});
+				}
+
+				this.title = "";
+				this.text = "";
+				this.files = null;
+				this.attachments = [];
 			} else {
 				this.notify({
 					type: "warning",
@@ -47,7 +101,10 @@ export default {
 		return {
 			title: "",
 			text: "",
-			file: null,
+			attachments: [],
+
+			files: null,
+			loading: false,
 		};
 	},
 };
