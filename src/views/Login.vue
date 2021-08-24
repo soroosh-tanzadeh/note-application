@@ -9,7 +9,7 @@
 				</form>
 			</q-card-section>
 			<q-card-section class="actions">
-				<q-btn color="primary" @click="login">Login</q-btn>
+				<q-btn color="primary" @click="login">Login/Create Account</q-btn>
 			</q-card-section>
 		</q-card>
 	</div>
